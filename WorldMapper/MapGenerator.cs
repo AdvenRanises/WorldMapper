@@ -1,4 +1,5 @@
 using Microsoft.Xna.Framework;
+using SkiaSharp;
 using Terraria;
 using Terraria.Map;
 
@@ -8,9 +9,7 @@ namespace WorldMapper
     {
         public static DirectBitmap Create(Rectangle? region = null)
         {
-            Rectangle realRegion;
-            realRegion = region ?? new Rectangle(0, 0, Main.maxTilesX, Main.maxTilesY);
-
+            Rectangle realRegion = region ?? new Rectangle(0, 0, Main.maxTilesX, Main.maxTilesY);
             var bitmap = new DirectBitmap(realRegion.Width, realRegion.Height);
 
             var replacedMap = false;
@@ -29,7 +28,7 @@ namespace WorldMapper
                     var tile = MapHelper.CreateMapTile(x + realRegion.X, y + realRegion.Y, byte.MaxValue);
                     var col = MapHelper.GetMapTileXnaColor(ref tile);
 
-                    bitmap.SetPixel(x, y, System.Drawing.Color.FromArgb(col.A, col.R, col.G, col.B));
+                    bitmap.SetPixel(x, y, new SKColor(col.R, col.G, col.B, col.A));
                 }
             }
 
