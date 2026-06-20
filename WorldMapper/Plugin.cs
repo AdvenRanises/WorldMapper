@@ -1,11 +1,11 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Reflection;
 using Newtonsoft.Json;
-using OTAPI;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
+using On.Terraria.IO;
 
 namespace WorldMapper
 {
@@ -16,11 +16,10 @@ namespace WorldMapper
         public override string Author => "James Puleo";
         public override string Description => "Generates a PNG map of the entire world";
         public override Version Version => Assembly.GetExecutingAssembly().GetName().Version;
+
         private Config _config;
 
-        public Plugin(Main game) : base(game)
-        {
-        }
+        public Plugin(Main game) : base(game) { }
 
         public override void Initialize()
         {
@@ -28,44 +27,53 @@ namespace WorldMapper
                 ? JsonConvert.DeserializeObject<Config>(File.ReadAllText(Config.DefaultPath))
                 : new Config();
 
-            Hooks.World.IO.PostLoadWorld += OnPostLoadWorld;
-            Hooks.World.IO.PostSaveWorld += OnPostSaveWorld;
+            WorldFile.LoadWorld += OnLoadWorld;
+            WorldFile.SaveWorld += OnSaveWorld;
 
             Commands.ChatCommands.Add(new Command("worldmapper.generatemap", args =>
             {
                 var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-
                 var fileName = args.Parameters.Count >= 1
                     ? args.Parameters[0]
                     : string.Format(_config.MapFileNameFormat, Main.worldName, "manual", now);
 
                 using var bitmap = MapGenerator.Create();
-                Save(bitmap, fileName);
+                bitmap.Save(fileName);
+                TShock.Log.ConsoleInfo($"Map generated and saved as {fileName}");
                 args.Player.SendSuccessMessage($"Map saved as {fileName}");
             }, "generatemap"));
         }
 
-        private void OnPostSaveWorld(bool usecloudsaving, bool resettime)
+        protected override void Dispose(bool disposing)
         {
-            DoAutomaticGenerate("save");
+            if (disposing)
+            {
+                WorldFile.LoadWorld -= OnLoadWorld;
+                WorldFile.SaveWorld -= OnSaveWorld;
+            }
+            base.Dispose(disposing);
         }
 
-        private void OnPostLoadWorld(bool loadfromcloud)
+        private void OnLoadWorld(On.Terraria.IO.WorldFile.orig_LoadWorld orig, bool loadFromCloud)
         {
-            DoAutomaticGenerate("load");
+            orig(loadFromCloud);
+            if (_config.SaveMapOnWorldLoad)
+                DoAutomaticGenerate("load");
+        }
+
+        private void OnSaveWorld(On.Terraria.IO.WorldFile.orig_SaveWorld orig, bool useCloudSaving, bool resetTime)
+        {
+            orig(useCloudSaving, resetTime);
+            if (_config.SaveMapOnWorldSave)
+                DoAutomaticGenerate("save");
         }
 
         private void DoAutomaticGenerate(string why)
         {
             var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             using var bitmap = MapGenerator.Create();
-            Save(bitmap, string.Format(_config.MapFileNameFormat, Main.worldName, why, now));
-        }
-
-        private static void Save(DirectBitmap bitmap, string fileName)
-        {
-            bitmap.Bitmap.Save(fileName);
-            TShock.Log.ConsoleInfo($"Map generated and saved as {fileName}");
+            bitmap.Save(string.Format(_config.MapFileNameFormat, Main.worldName, why, now));
+            TShock.Log.ConsoleInfo($"Map auto-generated ({why})");
         }
     }
 }
