@@ -12,35 +12,31 @@
 
   <ItemGroup>
     <Reference Include="OTAPI">
-      <HintPath>libs\OTAPI.dll</HintPath>
+      <HintPath>..\libs\OTAPI.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="TerrariaApi.Server" Condition="Exists('libs\TerrariaApi.Server.dll')">
-      <HintPath>libs\TerrariaApi.Server.dll</HintPath>
+    <Reference Include="TerrariaApi.Server" Condition="Exists('..\libs\TerrariaApi.Server.dll')">
+      <HintPath>..\libs\TerrariaApi.Server.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="TSAPI" Condition="Exists('libs\TSAPI.dll')">
-      <HintPath>libs\TSAPI.dll</HintPath>
+    <Reference Include="TSAPI" Condition="Exists('..\libs\TSAPI.dll')">
+      <HintPath>..\libs\TSAPI.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="TerrariaServer" Condition="Exists('libs\TerrariaServer.exe')">
-      <HintPath>libs\TerrariaServer.exe</HintPath>
+    <Reference Include="TerrariaServer" Condition="Exists('..\libs\TerrariaServer.exe')">
+      <HintPath>..\libs\TerrariaServer.exe</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="TerrariaServer" Condition="Exists('libs\TerrariaServer.dll')">
-      <HintPath>libs\TerrariaServer.dll</HintPath>
+    <Reference Include="TShock.Server" Condition="Exists('..\libs\TShock.Server.dll')">
+      <HintPath>..\libs\TShock.Server.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="TShock.Server" Condition="Exists('libs\TShock.Server.dll')">
-      <HintPath>libs\TShock.Server.dll</HintPath>
+    <Reference Include="TShockAPI" Condition="Exists('..\libs\TShockAPI.dll')">
+      <HintPath>..\libs\TShockAPI.dll</HintPath>
       <Private>false</Private>
     </Reference>
-    <Reference Include="TShockAPI" Condition="Exists('libs\TShockAPI.dll')">
-      <HintPath>libs\TShockAPI.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
-    <Reference Include="ModFramework" Condition="Exists('libs\ModFramework.dll')">
-      <HintPath>libs\ModFramework.dll</HintPath>
+    <Reference Include="ModFramework" Condition="Exists('..\libs\ModFramework.dll')">
+      <HintPath>..\libs\ModFramework.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
