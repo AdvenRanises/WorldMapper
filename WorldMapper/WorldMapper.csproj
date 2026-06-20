@@ -1,23 +1,54 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <TargetFramework>net48</TargetFramework>
-        <LangVersion>latest</LangVersion>
-    </PropertyGroup>
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>WorldMapper</AssemblyName>
+    <RootNamespace>WorldMapper</RootNamespace>
+    <Version>1.0.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
 
-    <ItemGroup>
-      <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed">
-        <HintPath>..\..\tshock_test\Newtonsoft.Json.dll</HintPath>
-      </Reference>
-      <Reference Include="OTAPI, Version=1.4.2.3, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\tshock_test\OTAPI.dll</HintPath>
-      </Reference>
-      <Reference Include="TerrariaServer, Version=1.4.2.3, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\tshock_test\TerrariaServer.exe</HintPath>
-      </Reference>
-      <Reference Include="TShockAPI, Version=4.5.4.0, Culture=neutral, PublicKeyToken=null">
-        <HintPath>..\..\tshock_test\ServerPlugins\TShockAPI.dll</HintPath>
-      </Reference>
-    </ItemGroup>
+  <ItemGroup>
+    <Reference Include="OTAPI">
+      <HintPath>libs\OTAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TerrariaApi.Server" Condition="Exists('libs\TerrariaApi.Server.dll')">
+      <HintPath>libs\TerrariaApi.Server.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TSAPI" Condition="Exists('libs\TSAPI.dll')">
+      <HintPath>libs\TSAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TerrariaServer" Condition="Exists('libs\TerrariaServer.exe')">
+      <HintPath>libs\TerrariaServer.exe</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TerrariaServer" Condition="Exists('libs\TerrariaServer.dll')">
+      <HintPath>libs\TerrariaServer.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TShock.Server" Condition="Exists('libs\TShock.Server.dll')">
+      <HintPath>libs\TShock.Server.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TShockAPI" Condition="Exists('libs\TShockAPI.dll')">
+      <HintPath>libs\TShockAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ModFramework" Condition="Exists('libs\ModFramework.dll')">
+      <HintPath>libs\ModFramework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.8" />
+  </ItemGroup>
 
 </Project>
