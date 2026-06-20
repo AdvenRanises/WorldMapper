@@ -27,7 +27,6 @@ jobs:
           cd libs
           [ -f TSAPI.dll ] && [ ! -f TerrariaApi.Server.dll ] && cp TSAPI.dll TerrariaApi.Server.dll
           [ ! -f TerrariaServer.exe ] && [ -f TShock.Server.exe ] && cp TShock.Server.exe TerrariaServer.exe
-          [ ! -f TerrariaServer.dll ] && [ -f TShock.Server.dll ] && cp TShock.Server.dll TerrariaServer.dll
           [ -f TShock.dll ] && [ ! -f TShockAPI.dll ] && cp TShock.dll TShockAPI.dll
           ls -la
 
@@ -38,4 +37,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: WorldMapper
-          path: bin/Release/net9.0/WorldMapper.dll
+          path: WorldMapper/bin/Release/net9.0/WorldMapper.dll
