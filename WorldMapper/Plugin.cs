@@ -1,11 +1,12 @@
 using System;
 using System.IO;
 using System.Reflection;
+using MonoMod.RuntimeDetour;
 using Newtonsoft.Json;
 using Terraria;
+using Terraria.IO;
 using TerrariaApi.Server;
 using TShockAPI;
-using On.Terraria.IO;
 
 namespace WorldMapper
 {
@@ -15,20 +16,20 @@ namespace WorldMapper
         public override string Name => "World Mapper";
         public override string Author => "James Puleo";
         public override string Description => "Generates a PNG map of the entire world";
-        public override Version Version => Assembly.GetExecutingAssembly().GetName().Version ?? new Version(1, 0, 0, 0);
+        public override Version Version => Assembly.GetExecutingAssembly().GetName().Version;
 
-        private Config? _config;
+        private Config _config;
+        private Hook _saveHook;
 
         public Plugin(Main game) : base(game) { }
 
         public override void Initialize()
         {
             _config = File.Exists(Config.DefaultPath)
-                ? JsonConvert.DeserializeObject<Config>(File.ReadAllText(Config.DefaultPath)) ?? new Config()
+                ? JsonConvert.DeserializeObject<Config>(File.ReadAllText(Config.DefaultPath))
                 : new Config();
 
-            WorldFile.LoadWorld += OnLoadWorld;
-            WorldFile.SaveWorld += OnSaveWorld;
+            ServerApi.Hooks.GamePostInitialize.Register(this, OnPostInit);
 
             Commands.ChatCommands.Add(new Command("worldmapper.generatemap", args =>
             {
@@ -44,36 +45,57 @@ namespace WorldMapper
             }, "generatemap"));
         }
 
-        protected override void Dispose(bool disposing)
+        private void OnPostInit(EventArgs args)
         {
-            if (disposing)
-            {
-                WorldFile.LoadWorld -= OnLoadWorld;
-                WorldFile.SaveWorld -= OnSaveWorld;
-            }
-            base.Dispose(disposing);
-        }
-
-        private void OnLoadWorld(On.Terraria.IO.WorldFile.orig_LoadWorld orig, bool loadFromCloud)
-        {
-            orig(loadFromCloud);
-            if (_config?.SaveMapOnWorldLoad == true)
+            if (_config.SaveMapOnWorldLoad)
                 DoAutomaticGenerate("load");
+
+            if (_config.SaveMapOnWorldSave)
+                HookWorldSave();
         }
 
-        private void OnSaveWorld(On.Terraria.IO.WorldFile.orig_SaveWorld orig, bool useCloudSaving, bool resetTime)
+        private void HookWorldSave()
+        {
+            try
+            {
+                var saveMethod = typeof(WorldFile).GetMethod("SaveWorld", new[] { typeof(bool), typeof(bool) });
+                if (saveMethod == null)
+                {
+                    TShock.Log.ConsoleError("[WorldMapper] Could not find WorldFile.SaveWorld. Auto-save on world save disabled.");
+                    return;
+                }
+
+                var hookMethod = typeof(Plugin).GetMethod(nameof(OnSaveWorld), BindingFlags.NonPublic | BindingFlags.Instance);
+                _saveHook = new Hook(saveMethod, hookMethod, this);
+            }
+            catch (Exception ex)
+            {
+                TShock.Log.ConsoleError($"[WorldMapper] Failed to hook world save: {ex.Message}");
+            }
+        }
+
+        private void OnSaveWorld(Action<bool, bool> orig, bool useCloudSaving, bool resetTime)
         {
             orig(useCloudSaving, resetTime);
-            if (_config?.SaveMapOnWorldSave == true)
-                DoAutomaticGenerate("save");
+            DoAutomaticGenerate("save");
         }
 
         private void DoAutomaticGenerate(string why)
         {
             var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             using var bitmap = MapGenerator.Create();
-            bitmap.Save(string.Format(_config!.MapFileNameFormat, Main.worldName, why, now));
+            bitmap.Save(string.Format(_config.MapFileNameFormat, Main.worldName, why, now));
             TShock.Log.ConsoleInfo($"Map auto-generated ({why})");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                ServerApi.Hooks.GamePostInitialize.Deregister(this, OnPostInit);
+                _saveHook?.Dispose();
+            }
+            base.Dispose(disposing);
         }
     }
 }
