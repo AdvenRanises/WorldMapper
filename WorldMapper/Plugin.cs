@@ -5,7 +5,6 @@ using Newtonsoft.Json;
 using Terraria;
 using TerrariaApi.Server;
 using TShockAPI;
-using On.Terraria.IO;
 
 namespace WorldMapper
 {
@@ -27,8 +26,7 @@ namespace WorldMapper
                 ? JsonConvert.DeserializeObject<Config>(File.ReadAllText(Config.DefaultPath))
                 : new Config();
 
-            WorldFile.LoadWorld += OnLoadWorld;
-            WorldFile.SaveWorld += OnSaveWorld;
+            ServerApi.Hooks.GamePostInitialize.Register(this, OnPostInit);
 
             Commands.ChatCommands.Add(new Command("worldmapper.generatemap", args =>
             {
@@ -44,28 +42,42 @@ namespace WorldMapper
             }, "generatemap"));
         }
 
-        protected override void Dispose(bool disposing)
+        private void OnPostInit(EventArgs args)
         {
-            if (disposing)
-            {
-                WorldFile.LoadWorld -= OnLoadWorld;
-                WorldFile.SaveWorld -= OnSaveWorld;
-            }
-            base.Dispose(disposing);
-        }
-
-        private void OnLoadWorld(On.Terraria.IO.WorldFile.orig_LoadWorld orig, bool loadFromCloud)
-        {
-            orig(loadFromCloud);
             if (_config.SaveMapOnWorldLoad)
                 DoAutomaticGenerate("load");
+
+            if (_config.SaveMapOnWorldSave)
+                HookWorldSave();
         }
 
-        private void OnSaveWorld(On.Terraria.IO.WorldFile.orig_SaveWorld orig, bool useCloudSaving, bool resetTime)
+        private void HookWorldSave()
+        {
+            try
+            {
+                var saveMethod = typeof(Terraria.IO.WorldFile).GetMethod("SaveWorld", new[] { typeof(bool), typeof(bool) });
+                if (saveMethod == null)
+                {
+                    TShock.Log.ConsoleError("[WorldMapper] Could not hook world save.");
+                    return;
+                }
+
+                var hook = new MonoMod.RuntimeDetour.Hook(
+                    saveMethod,
+                    typeof(Plugin).GetMethod(nameof(OnSaveWorld), BindingFlags.NonPublic | BindingFlags.Instance),
+                    this
+                );
+            }
+            catch (Exception ex)
+            {
+                TShock.Log.ConsoleError($"[WorldMapper] Save hook failed: {ex.Message}");
+            }
+        }
+
+        private void OnSaveWorld(Action<bool, bool> orig, bool useCloudSaving, bool resetTime)
         {
             orig(useCloudSaving, resetTime);
-            if (_config.SaveMapOnWorldSave)
-                DoAutomaticGenerate("save");
+            DoAutomaticGenerate("save");
         }
 
         private void DoAutomaticGenerate(string why)
@@ -74,6 +86,13 @@ namespace WorldMapper
             using var bitmap = MapGenerator.Create();
             bitmap.Save(string.Format(_config.MapFileNameFormat, Main.worldName, why, now));
             TShock.Log.ConsoleInfo($"Map auto-generated ({why})");
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+                ServerApi.Hooks.GamePostInitialize.Deregister(this, OnPostInit);
+            base.Dispose(disposing);
         }
     }
 }
