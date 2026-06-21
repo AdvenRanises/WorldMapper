@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <AssemblyName>WorldMapper</AssemblyName>
+    <RootNamespace>WorldMapper</RootNamespace>
+    <Version>1.0.0.0</Version>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Reference Include="OTAPI">
+      <HintPath>libs\OTAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TerrariaApi.Server" Condition="Exists('libs\TerrariaApi.Server.dll')">
+      <HintPath>libs\TerrariaApi.Server.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TSAPI" Condition="Exists('libs\TSAPI.dll')">
+      <HintPath>libs\TSAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TerrariaServer" Condition="Exists('libs\TerrariaServer.exe')">
+      <HintPath>libs\TerrariaServer.exe</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TerrariaServer" Condition="Exists('libs\TerrariaServer.dll')">
+      <HintPath>libs\TerrariaServer.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TShock.Server" Condition="Exists('libs\TShock.Server.dll')">
+      <HintPath>libs\TShock.Server.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="TShockAPI" Condition="Exists('libs\TShockAPI.dll')">
+      <HintPath>libs\TShockAPI.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+    <Reference Include="ModFramework" Condition="Exists('libs\ModFramework.dll')">
+      <HintPath>libs\ModFramework.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="SkiaSharp" Version="2.88.8" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux.NoDependencies" Version="2.88.8" />
+  </ItemGroup>
+
+</Project>
