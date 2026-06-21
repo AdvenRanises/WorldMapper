@@ -26,7 +26,7 @@ namespace WorldMapper
                 for (var y = 0; y < realRegion.Height; y++)
                 {
                     var tile = MapHelper.CreateMapTile(x + realRegion.X, y + realRegion.Y, byte.MaxValue);
-                    var col = MapHelper.GetMapTileXnaColor(ref tile);
+                    var col = MapHelper.GetMapTileXnaColor(tile);
 
                     bitmap.SetPixel(x, y, new SKColor(col.R, col.G, col.B, col.A));
                 }
