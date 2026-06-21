@@ -43,6 +43,10 @@
       <HintPath>libs\ModFramework.dll</HintPath>
       <Private>false</Private>
     </Reference>
+    <Reference Include="MonoMod.RuntimeDetour" Condition="Exists('libs\MonoMod.RuntimeDetour.dll')">
+      <HintPath>libs\MonoMod.RuntimeDetour.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
